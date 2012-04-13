@@ -22,12 +22,12 @@ This library use android based resources to make operations on a rest server.
 
 ## Usage
 
-	BasicNameValuePair params[] = {
-		new BasicNameValuePair("username", "teste"),
-		new BasicNameValuePair("password", "teste")
-	};
 	String rpc = 'login';
-
+	List<NameValuePair> params = new ArrayList<NameValuePair>();
+	
+	params.add(new BasicNameValuePair("parameters[username]", "teste"));
+	params.add(new BasicNameValuePair("parameters[password]", "teste"));
+	
 	rest.call(rpc, params, new OnRestResponse() {
 			
 		public void onResponse(String response) {
@@ -40,7 +40,7 @@ This library use android based resources to make operations on a rest server.
 
 	});
 
-The library will convert the the params array to a json format closured on a array calles parameters, the server will receive some like: {parameters: {username: "teste", password: "teste"}}
+The library will encode the parameters, the server will receive an array on decode.
 
 ## TODO
 
