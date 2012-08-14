@@ -11,6 +11,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -74,7 +75,7 @@ public class RestClient {
     	try {
 			
     		http.setEntity(new UrlEncodedFormEntity(parameters));
-    	
+    		
     	} catch (UnsupportedEncodingException e) {
 			onReponse.onError(501, e.getLocalizedMessage());
 		} finally {
@@ -88,32 +89,56 @@ public class RestClient {
 	    
 	}
 
-	public void execute(String url, int method, OnRestResponse onReponse) {
+	public void get(String url, OnRestResponse onReponse) {
     	
-		HttpUriRequest request = null;
+		HttpGet request = new HttpGet(getServer() + "/" + url);
+    	buildAndSend(request, onReponse);    	
+    }
+	
+	public void post(String url, List<NameValuePair> parameters, OnRestResponse onReponse) {
     	
-    	switch(method) {
-            case GET:
-                request = new HttpGet(getServer() + "/" + url);                
-                break;
-            case POST:
-                request = new HttpPost(getServer() + "/" + url);
-                break;
-        }
+		HttpPost request = new HttpPost(getServer() + "/" + url);
+        
+    	try {
+    		
+    		request.setEntity(new UrlEncodedFormEntity(parameters));
+    		
+    	} catch (UnsupportedEncodingException e) {
+			onReponse.onError(501, e.getLocalizedMessage());
+		}
     	
-    	request.setHeader("Content-type", "application/json");
-	    request.setHeader("Authorization" , getKey());
+    	buildAndSend(request, onReponse);    	
+    }
+	
+	public void put(String url, List<NameValuePair> parameters, OnRestResponse onReponse) {
+    	
+		HttpPut request = new HttpPut(getServer() + "/" + url);
+        
+    	try {
+    		
+    		request.setEntity(new UrlEncodedFormEntity(parameters));
+    		
+    	} catch (UnsupportedEncodingException e) {
+			onReponse.onError(501, e.getLocalizedMessage());
+		}
+    	
+    	buildAndSend(request, onReponse);    	
+    }
+	
+	private void buildAndSend(HttpUriRequest request, OnRestResponse onReponse) {
+		
+		request.setHeader("Authorization" , getKey());
     	
     	for(NameValuePair h : headers) {
             request.addHeader(h.getName(), h.getValue());
         }
-    	
-    	RestRequest restRequest = new RestRequest();
+		
+		RestRequest restRequest = new RestRequest();
     	restRequest.setOnReponse(onReponse);
     	restRequest.setRequest(request);
     	restRequest.execute();
-    	
-    }
+		
+	}
 	
 	private class RestRequest extends AsyncTask<String, Integer, String> {
 		
